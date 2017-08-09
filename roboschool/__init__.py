@@ -89,6 +89,13 @@ register(
     max_episode_steps=1000
     )
 
+
+register(
+    id="RoboschoolDemo-v0",
+    entry_point='roboschool:RoboschoolDemo',
+    max_episode_steps=1000000000000000
+    )
+
 from roboschool.gym_pendulums import RoboschoolInvertedPendulum
 from roboschool.gym_pendulums import RoboschoolInvertedPendulumSwingup
 from roboschool.gym_pendulums import RoboschoolInvertedDoublePendulum
@@ -102,3 +109,4 @@ from roboschool.gym_humanoid_flagrun import RoboschoolHumanoidFlagrun
 from roboschool.gym_humanoid_flagrun import RoboschoolHumanoidFlagrunHarder
 from roboschool.gym_atlas import RoboschoolAtlasForwardWalk
 from roboschool.gym_pong import RoboschoolPong
+from roboschool.gym_interact_demo import RoboschoolDemo

@@ -72,16 +72,51 @@ If you have both Python2 and Python3 on your system, use `python3` and `pip3` co
 
 The dependencies are gym, Qt5, assimp, tinyxml, and bullet (from a branch). For the non-bullet deps, there are several options, depending on what platform and package manager you are using.
 
-- Ubuntu:
+- Ubuntu (14.04):
+
+    ```bash
+    apt install cmake ffmpeg pkg-config libpython3.5-dev libboost-python-dev libtinyxml-dev
+    ```
+    Install Qt 5.5 from here:
+    https://download.qt.io/archive/qt/5.5/5.5.1/qt-opensource-linux-x64-5.5.1.run
+
+    Install assimp from Linuxbrew
+    ```
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
+    brew install assimp
+    ```
+
+    Remember to add the paths of Linuxbrew and Qt 5.5 to the system path. If you find the following error after successfully installing the package
+    ```bash
+    QGLShaderProgram: could not create shader program
+    bool QGLShaderPrivate::create(): Could not create shader of type 2.
+    python3: render-simple.cpp:217: void SimpleRender::Context::initGL(): Assertion r0 failed.
+    Aborted
+    ```
+    Try install the pyopengl package to set up the necessary OpenGL libraries:
+    ```bash
+    sudo pip3 install pyopengl
+    ```
+    If this error still exits, try reinstall the Nvidia driver.
+
+- Ubuntu (16.04):
 
     ```bash
     apt install cmake ffmpeg pkg-config qtbase5-dev libqt5opengl5-dev libassimp-dev libpython3.5-dev libboost-python-dev libtinyxml-dev
     ```
 
-    Users report in issue #15 that `sudo pip3 install pyopengl` can make OpenGL errors go away, because it arranges OpenGL libraries in
-    an Ubuntu system in the right way.
-
-
+    if you find the following error after successfully installing the package
+    ```bash
+    QGLShaderProgram: could not create shader program
+    bool QGLShaderPrivate::create(): Could not create shader of type 2.
+    python3: render-simple.cpp:217: void SimpleRender::Context::initGL(): Assertion r0 failed.
+    Aborted
+    ```
+    Try install the pyopengl package to set up the necessary OpenGL libraries:
+    ```bash
+    sudo pip3 install pyopengl
+    ```
+    If this error still exits, try reinstall the Nvidia driver.
 
 - Linuxbrew
 

@@ -89,6 +89,7 @@ shared_ptr<Robot> World::load_urdf(const std::string& fn, const btTransform& tr,
 	load_robot_shapes(robot);
 	robotlist.push_back(robot);
 	bullet_handle_to_robot[robot->bullet_handle] = robot;
+    robot->root_part->bullet_handle = robot->bullet_handle;
 	return robot;
 }
 

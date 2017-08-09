@@ -110,7 +110,7 @@ struct Camera {
 	int camera_aux_w = 96;
 	int camera_aux_h = 64;
 	float camera_hfov  = 90; // horizontal fov
-	float camera_near  = 0.1;
+	float camera_near  = 0.001;
 	float camera_far   = 100;
 	float camera_fps   = 60;
 	std::string camera_rgb;

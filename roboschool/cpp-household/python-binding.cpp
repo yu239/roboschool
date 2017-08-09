@@ -283,6 +283,7 @@ struct Robot {
 	boost::python::list parts()   { boost::python::list r; for (auto p: rref->robot_parts) if (p) r.append(Thingy(p, wref)); return r; }
 	Thingy root_part()  { return Thingy(rref->root_part, wref); }
 	Pose pose()  { Pose r; r.from_bt_transform(rref->root_part->bullet_position); return r; }
+    tuple speed() { return make_tuple(rref->root_part->bullet_speed[0]/SCALE, rref->root_part->bullet_speed[1]/SCALE, rref->root_part->bullet_speed[2]/SCALE); }
 	void query_position()  { wref->query_body_position(rref); } // necessary for robot that is just created, before any step() done
 	void set_pose(const Pose& p)  { wref->robot_move(rref, p.convert_to_bt_transform(), btVector3(0,0,0)); }
 	void set_pose_and_speed(const Pose& p, float vx, float vy, float vz)  { wref->robot_move(rref, p.convert_to_bt_transform(), btVector3(vx,vy,vz)); }
@@ -671,6 +672,8 @@ void cpp_household_init()
 	.def("set_pose", &Robot::set_pose)
 	.def("set_pose_and_speed", &Robot::set_pose_and_speed)
 	.def("query_position", &Robot::query_position)
+    .def("pose", &Robot::pose)
+    .def("speed", &Robot::speed)
 	//.def("replace_texture", &Robot::replace_texture)
 	;
 
