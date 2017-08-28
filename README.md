@@ -6,7 +6,7 @@ NEWS
 
 * All envs version bumped to “-v1", due to stronger stuck joint punishment, that improves odds of getting a good policy.
 * Flagrun-v1 is much more likely to develop a symmetric gait,
-* FlagrunHarder-v1 has new "repeat-underlearned" learning schedule, that allows it to be trained to stand up, walk and turn without falling. 
+* FlagrunHarder-v1 has new "repeat-underlearned" learning schedule, that allows it to be trained to stand up, walk and turn without falling.
 * Atlas robot model, modified (empty links removed, overly powerful feet weakaned).
 * All -v1 envs are shipped with better zoo policies, compared to May versions.
 * Keyboard-controlled humanoid included.
@@ -163,10 +163,10 @@ make install
 cd ../..
 ```
 
-Finally, install project itself:
+Finally, install project itself: __NOTE__ for Linux user, please set the compiler to gcc-5 before using pip to install.
 
 ```bash
-pip3 install -e $ROBOSCHOOL_PATH
+pip3 install --user -e $ROBOSCHOOL_PATH
 ```
 
 Now, check to see if it worked by running a pretrained agent from the agent zoo.
@@ -188,4 +188,3 @@ To see three agents in a race:
 ```bash
 python $ROBOSCHOOL_PATH/agent_zoo/demo_race2.py
 ```
-

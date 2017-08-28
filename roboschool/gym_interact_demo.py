@@ -151,6 +151,17 @@ class SceneBuilder:
 
         return self.agent, apose, self.max_step, self.actions
 
+    def step(self):
+        for i in range(len(self.m)):
+            mpose = cpp_household.Pose()
+            step_func = self.m[i][3]
+            x, y, z = self.m_list[i].pose().xyz()[0:3]
+            dx, dy, dz = self.m_list[i].speed()
+            x, y, z, dx, dy, dz = step_func(x, y, z, dx, dy, dz)
+            mpose.set_xyz(x, y, z)
+            mpose.set_rpy(0.0, 0.0, 0.0)
+            self.m_list[i].set_pose_and_speed(mpose, dx, dy, dz)
+
 
 class RoboschoolDemo(RoboschoolMujocoXmlEnv):
     def __init__(self):
@@ -201,6 +212,8 @@ class RoboschoolDemo(RoboschoolMujocoXmlEnv):
         else:
             self.rewards = [-0.1, ]
         self.HUD(state, a, False)
+
+        self.scene_builder.step()
 
         # done: 0 -- dead 1 -- alive 2 -- success
         done = 2

@@ -4,12 +4,12 @@
 import numpy as np
 import sys
 
-def step_function(x, y, z):
+def step_function(x, y, z, dx, dy, dz):
     """
-    in: x, y, z
+    in: x, y, z, dx/dt, dy/dt, dz/dt
     out: x, y, z, dx/dt, dy/dt, dz/dt
     """
-    return [x, y, z, 0., 0., 1.]
+    return [x, y, z, dx, dy, dz]
 
 def scene_config(history):
     """
@@ -102,6 +102,6 @@ def random_maze_config(history):
         ret_list.append([6, i, 0., 'block', step_function, 'models_household/block/block.urdf'])
         ret_list.append([i, 6, 0., 'block', step_function, 'models_household/block/block.urdf'])
     for o in o_list:
-        ret_list.append([o[0] + 1, o[1] + 1, 0, 'block', step_function, 'models_household/block/block.urdf'])
+        ret_list.append([o[0] + 1, o[1] + 1, 0, 'movable', step_function, 'models_household/cube/cube.urdf'])
     # return: the object list, the maximum step allowed, and the actions allowed
     return ret_list, 10 + 200 * (current_dist - 1), ['a', 'w', 'd', 'c', 'z']
