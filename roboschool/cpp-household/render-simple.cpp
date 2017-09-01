@@ -16,6 +16,9 @@
 // sysctl -n machdep.cpu.brand_string
 // google for processor id
 
+using smart_pointer::shared_ptr;
+using smart_pointer::weak_ptr;
+
 std::string glsl_path = "roboschool/cpp-household/glsl"; // outside namespace
 
 namespace SimpleRender {
@@ -438,7 +441,7 @@ void Context::_generate_ruler_vao()
 	glBindVertexArray(0);
 }
 
-void Context::_shape_to_vao(const boost::shared_ptr<Household::Shape>& shape)
+void Context::_shape_to_vao(const shared_ptr<Household::Shape>& shape)
 {
 	shape->vao.reset(new VAO);
 	allocated_vaos.push_back(shape->vao);
@@ -654,7 +657,7 @@ void ContextViewport::hud_print(const QRect& r, const QString& msg_text, uint32_
 	hud_update(r);
 }
 
-void opengl_init_before_app(const boost::shared_ptr<Household::World>& wref)
+void opengl_init_before_app(const shared_ptr<Household::World>& wref)
 {
 	QCoreApplication::setAttribute(Qt::AA_UseDesktopOpenGL, true);
 	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
@@ -669,7 +672,7 @@ void opengl_init_before_app(const boost::shared_ptr<Household::World>& wref)
 	wref->cx->fmt = fmt;
 }
 
-void opengl_init(const boost::shared_ptr<SimpleRender::Context>& cx)
+void opengl_init(const shared_ptr<SimpleRender::Context>& cx)
 {
 	cx->surf = new QOffscreenSurface();
 	cx->surf->setFormat(cx->fmt);

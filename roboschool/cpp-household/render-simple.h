@@ -2,7 +2,6 @@
 #include <ios>
 #include "household.h"
 
-#include <boost/shared_ptr.hpp>
 #include <QtWidgets/QOpenGLWidget>
 #include <QtGui/QSurface>
 #include <QtGui/QOffscreenSurface>
@@ -22,11 +21,8 @@ class ScreenSpaceAmbientOcclusion;
 
 namespace SimpleRender {
 
-using boost::shared_ptr;
-using boost::weak_ptr;
-
-extern void primitives_to_mesh(const shared_ptr<Household::ShapeDetailLevels>& m, int want_detail, int shape_n);
-extern shared_ptr<QGLShaderProgram> load_program(const std::string& vert_fn, const std::string& geom_fn, const std::string& frag_fn, const char* vert_defines=0, const char* geom_defines=0, const char* frag_defines=0);
+extern void primitives_to_mesh(const smart_pointer::shared_ptr<Household::ShapeDetailLevels>& m, int want_detail, int shape_n);
+extern smart_pointer::shared_ptr<QGLShaderProgram> load_program(const std::string& vert_fn, const std::string& geom_fn, const std::string& frag_fn, const char* vert_defines=0, const char* geom_defines=0, const char* frag_defines=0);
 
 enum {
 	VIEW_CAMERA_BIT      = 0x0001,
@@ -71,7 +67,7 @@ const int HBAO_RANDOM_SIZE = AO_RANDOMTEX_SIZE;
 const int HBAO_RANDOM_ELEMENTS = HBAO_RANDOM_SIZE*HBAO_RANDOM_SIZE;
 
 struct Context {
-	Context(const shared_ptr<Household::World>& world);
+	Context(const smart_pointer::shared_ptr<Household::World>& world);
 	~Context();
 
 	QFont score_font_big;
@@ -79,13 +75,13 @@ struct Context {
 	bool score_font_inited = false;
 	bool slowmo = false;
 
-	weak_ptr<Household::World> weak_world;
+	smart_pointer::weak_ptr<Household::World> weak_world;
 
 	QSurfaceFormat fmt;
 	QOffscreenSurface* surf = 0;
 	QOpenGLContext* glcx = 0;
 	QOpenGLWidget* dummy_openglwidget = 0;
-	std::vector<shared_ptr<Texture>> textures;
+	std::vector<smart_pointer::shared_ptr<Texture>> textures;
 
 	int location_input_matrix_modelview_inverse_transpose;
 	int location_input_matrix_modelview;
@@ -93,13 +89,13 @@ struct Context {
 	int location_texture;
 	int location_uni_color;
 	int location_multiply_color;
-	shared_ptr<QGLShaderProgram> program_tex;
+	smart_pointer::shared_ptr<QGLShaderProgram> program_tex;
 
 	int location_clipInfo;
-	shared_ptr<QGLShaderProgram> program_depth_linearize;
-	//shared_ptr<QGLShaderProgram> program_depth_linearize_msaa;
+	smart_pointer::shared_ptr<QGLShaderProgram> program_depth_linearize;
+	//smart_pointer::shared_ptr<QGLShaderProgram> program_depth_linearize_msaa;
 
-	shared_ptr<QGLShaderProgram> program_displaytex;
+	smart_pointer::shared_ptr<QGLShaderProgram> program_displaytex;
 
 	int location_RadiusToScreen;
 	int location_R2;             // 1/radius
@@ -118,15 +114,15 @@ struct Context {
 	int location_texRandom;
 
 	bool ssao_enable = true;
-	shared_ptr<QGLShaderProgram> program_hbao_calc;
-	shared_ptr<QGLShaderProgram> program_calc_blur;
+	smart_pointer::shared_ptr<QGLShaderProgram> program_hbao_calc;
+	smart_pointer::shared_ptr<QGLShaderProgram> program_calc_blur;
 
-	std::list<shared_ptr<VAO>>    allocated_vaos;
-	std::list<shared_ptr<Buffer>> allocated_buffers;
+	std::list<smart_pointer::shared_ptr<VAO>>    allocated_vaos;
+	std::list<smart_pointer::shared_ptr<Buffer>> allocated_buffers;
 
 	int location_xywh;
 	int location_zpos;
-	shared_ptr<QGLShaderProgram> program_hud;
+	smart_pointer::shared_ptr<QGLShaderProgram> program_hud;
 
 	float pure_color_opacity = 1.0;
 
@@ -140,23 +136,23 @@ struct Context {
 	int cached_bind_texture(const std::string& image_fn);
 	std::map<std::string, int> bind_cache;
 
-	shared_ptr<struct UsefulStuff> useful = 0;
+	smart_pointer::shared_ptr<struct UsefulStuff> useful = 0;
 	void initGL();
 
 	bool _hbao_init();
-	shared_ptr<Texture> hbao_random;
-	shared_ptr<Texture> hbao_randomview[MAX_SAMPLES];
+	smart_pointer::shared_ptr<Texture> hbao_random;
+	smart_pointer::shared_ptr<Texture> hbao_randomview[MAX_SAMPLES];
 
-	shared_ptr<VAO> ruler_vao;
-	shared_ptr<Buffer> ruler_vertexes;
+	smart_pointer::shared_ptr<VAO> ruler_vao;
+	smart_pointer::shared_ptr<Buffer> ruler_vertexes;
 
-	void _shape_to_vao(const boost::shared_ptr<Household::Shape>& shape);
+	void _shape_to_vao(const smart_pointer::shared_ptr<Household::Shape>& shape);
 	void _generate_ruler_vao();
 };
 
 class ContextViewport {
 public:
-	shared_ptr<Context> cx;
+	smart_pointer::shared_ptr<Context> cx;
 	int visible_object_count;
 
 	int W, H, W16;
@@ -179,29 +175,29 @@ public:
 	float ssao_intensity = 0.9;
 	float ssao_bias      = 0.8;
 
-	ContextViewport(const shared_ptr<Context>& cx, int W, int H, double near, double far, double hfov);
+	ContextViewport(const smart_pointer::shared_ptr<Context>& cx, int W, int H, double near, double far, double hfov);
 
-	shared_ptr<Framebuffer> fbuf_scene;
-	shared_ptr<Framebuffer> fbuf_depthlinear;
-	shared_ptr<Framebuffer> fbuf_viewnormal;
-	shared_ptr<Framebuffer> fbuf_hbao_calc;
-	shared_ptr<Framebuffer> fbuf_hbao2_deinterleave;
-	shared_ptr<Framebuffer> fbuf_hbao2_calc;
+	smart_pointer::shared_ptr<Framebuffer> fbuf_scene;
+	smart_pointer::shared_ptr<Framebuffer> fbuf_depthlinear;
+	smart_pointer::shared_ptr<Framebuffer> fbuf_viewnormal;
+	smart_pointer::shared_ptr<Framebuffer> fbuf_hbao_calc;
+	smart_pointer::shared_ptr<Framebuffer> fbuf_hbao2_deinterleave;
+	smart_pointer::shared_ptr<Framebuffer> fbuf_hbao2_calc;
 
-	shared_ptr<Texture> tex_color;
-	shared_ptr<Texture> tex_depthstencil;
-	shared_ptr<Texture> tex_depthlinear;
-	shared_ptr<Texture> tex_viewnormal;
-	shared_ptr<Texture> hbao_result;
-	shared_ptr<Texture> hbao_blur;
-	shared_ptr<Texture> hbao2_deptharray;
-	shared_ptr<Texture> hbao2_depthview[HBAO_RANDOM_ELEMENTS];
-	shared_ptr<Texture> hbao2_resultarray;
+	smart_pointer::shared_ptr<Texture> tex_color;
+	smart_pointer::shared_ptr<Texture> tex_depthstencil;
+	smart_pointer::shared_ptr<Texture> tex_depthlinear;
+	smart_pointer::shared_ptr<Texture> tex_viewnormal;
+	smart_pointer::shared_ptr<Texture> hbao_result;
+	smart_pointer::shared_ptr<Texture> hbao_blur;
+	smart_pointer::shared_ptr<Texture> hbao2_deptharray;
+	smart_pointer::shared_ptr<Texture> hbao2_depthview[HBAO_RANDOM_ELEMENTS];
+	smart_pointer::shared_ptr<Texture> hbao2_resultarray;
 
 	QImage              hud_image;
-	shared_ptr<Texture> hud_texture;
-	shared_ptr<VAO>     hud_vao;
-	shared_ptr<Buffer>  hud_vertexbuf;
+	smart_pointer::shared_ptr<Texture> hud_texture;
+	smart_pointer::shared_ptr<VAO>     hud_vao;
+	smart_pointer::shared_ptr<Buffer>  hud_vertexbuf;
 	void hud_update_start();
 	void hud_update(const QRect& r);
 	int  hud_print_score(const std::string& score);
@@ -216,10 +212,10 @@ private:
 	void _ssao_run(int sampleIdx);
 	void _texture_paint(GLuint h);
 	int  _objects_loop(int floor_visible, uint32_t view_options);
-	void _render_single_object(const shared_ptr<Household::ShapeDetailLevels>& m, uint32_t f, int detail, const QMatrix4x4& at_pos);
+	void _render_single_object(const smart_pointer::shared_ptr<Household::ShapeDetailLevels>& m, uint32_t f, int detail, const QMatrix4x4& at_pos);
 };
 
-extern void opengl_init_before_app(const boost::shared_ptr<Household::World>& wref);
-extern void opengl_init(const boost::shared_ptr<SimpleRender::Context>& cx);
+extern void opengl_init_before_app(const smart_pointer::shared_ptr<Household::World>& wref);
+extern void opengl_init(const smart_pointer::shared_ptr<SimpleRender::Context>& cx);
 
 } // namespace

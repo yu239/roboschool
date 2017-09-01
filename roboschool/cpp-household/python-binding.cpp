@@ -1,5 +1,4 @@
 #include <boost/python.hpp>
-#include <boost/weak_ptr.hpp>
 
 #include "render-glwidget.h"
 
@@ -9,7 +8,8 @@
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QBuffer>
 
-using boost::shared_ptr;
+using smart_pointer::shared_ptr;
+using smart_pointer::weak_ptr;
 using namespace boost::python;
 
 namespace Household {
@@ -104,7 +104,7 @@ struct Thingy {
 	//void replace_texture(const std::string& tex, std::string newfn)  { tref->set_multiply_color(tex, 0, &newfn); }
 	void assign_metaclass(uint8_t mclass)  { tref->klass->metaclass = mclass; }
 
-	std::list<boost::weak_ptr<Household::Thingy>> sleep_list;
+	std::list<weak_ptr<Household::Thingy>> sleep_list;
 	boost::python::list contact_list()
 	{
 		boost::python::list r;
@@ -115,7 +115,7 @@ struct Thingy {
 				sleep_list.push_back(t);
 			}
 		} else {
-			for (const boost::weak_ptr<Household::Thingy>& t_: sleep_list) {
+			for (const weak_ptr<Household::Thingy>& t_: sleep_list) {
 				shared_ptr<Household::Thingy> t = t_.lock();
 				if (t) r.append(Thingy(t, wref));
 			}
@@ -149,7 +149,7 @@ struct App {
 	}
 };
 
-static boost::weak_ptr<App> the_app;
+static weak_ptr<App> the_app;
 
 shared_ptr<App> app_create_as_needed(const shared_ptr<Household::World>& wref)
 {

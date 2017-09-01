@@ -2,11 +2,6 @@
 
 #include <QtWidgets/QOpenGLWidget>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-
-using boost::shared_ptr;
-
 struct KeyCallback {
 	virtual ~KeyCallback()  { }
 	virtual void key_callback(int event_type, int key, int modifiers) =0;
@@ -22,15 +17,15 @@ struct ConsoleMessage {
 
 class Viz: public QOpenGLWidget {
 public:
-	shared_ptr<SimpleRender::Context> cx;
-	shared_ptr<SimpleRender::ContextViewport> render_viewport;
+	smart_pointer::shared_ptr<SimpleRender::Context> cx;
+	smart_pointer::shared_ptr<SimpleRender::ContextViewport> render_viewport;
 	bool render_viewport_resized = true;
-	shared_ptr<SimpleRender::Framebuffer> dummy_fbuf;
+	smart_pointer::shared_ptr<SimpleRender::Framebuffer> dummy_fbuf;
 	QFont font_score;
 
 	void render_on_offscreen_surface();
 
-	Viz(const shared_ptr<SimpleRender::Context>& cx);
+	Viz(const smart_pointer::shared_ptr<SimpleRender::Context>& cx);
 	~Viz();
 	void initializeGL();
 	void _render_on_correctly_set_up_context();
@@ -70,7 +65,7 @@ public:
 	float dup_opacity = 0.5;
 	int dup_transparent_mode = 0;
 
-	//shared_ptr<Household::Camera> camera;
+	//smart_pointer::shared_ptr<Household::Camera> camera;
 
 	std::vector<float> obs;
 	std::vector<float> obs_hist;
@@ -93,18 +88,18 @@ public:
 	ConsoleMessage caption;
 	void test_window_big_caption(const std::string& s);
 
-	boost::weak_ptr<KeyCallback> key_callback;
+	smart_pointer::weak_ptr<KeyCallback> key_callback;
 	void activate_key_callback(int event_type, int key, int modifiers);
 };
 
 class VizCamera: public QWidget {
 public:
-	boost::weak_ptr<Household::Camera> cref;
-	boost::weak_ptr<KeyCallback> key_callback;
+	smart_pointer::weak_ptr<Household::Camera> cref;
+	smart_pointer::weak_ptr<KeyCallback> key_callback;
 	std::string score;
 	const int MARGIN = 20;
 
-	VizCamera(const shared_ptr<Household::Camera>& cref): cref(cref)  { }
+	VizCamera(const smart_pointer::shared_ptr<Household::Camera>& cref): cref(cref)  { }
 	void paintEvent(QPaintEvent* ev);
 	void keyPressEvent(QKeyEvent* kev);
 	void keyReleaseEvent(QKeyEvent* kev);

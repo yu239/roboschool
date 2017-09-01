@@ -1,4 +1,4 @@
-#include "render-glwidget.h"
+j#include "render-glwidget.h"
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QCheckBox>
@@ -12,7 +12,6 @@
 
 #include <bullet/PhysicsClientC_API.h>
 
-using boost::shared_ptr;
 using namespace Household;
 
 namespace Household {

@@ -59,8 +59,8 @@ else
     BOOST_PYTHON = -lboost_python$(BOOST_PYTHON3_POSTFIX)
 endif
 
-CC=gcc
-LINK=gcc
+CC=gcc-5
+LINK=gcc-5
 AR=ar r
 AR_OUT=
 LINK_OUT= -o

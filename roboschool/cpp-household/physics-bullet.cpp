@@ -3,6 +3,9 @@
 #include <QtCore/QDir>
 #include <QtCore/QElapsedTimer>
 
+using smart_pointer::shared_ptr;
+using smart_pointer::weak_ptr;
+
 namespace Household {
 
 #ifdef CHROME_TRACING
@@ -53,8 +56,8 @@ void World::settings_apply()
 void World::clean_everything()
 {
 	b3SubmitClientCommandAndWaitStatus(client, b3InitResetSimulationCommand(client));
-	for (const boost::weak_ptr<Robot>& r: robotlist) {
-		boost::shared_ptr<Robot> robot = r.lock();
+	for (const weak_ptr<Robot>& r: robotlist) {
+		shared_ptr<Robot> robot = r.lock();
 		if (!robot) continue;
 		robot->bullet_handle = -1;
 	}
@@ -377,8 +380,8 @@ void World::bullet_step(int skip_frames)
 		b3SubmitClientCommandAndWaitStatus(client, command);
 	}
 
-	for (const boost::weak_ptr<Robot>& wr: robotlist) {
-		boost::shared_ptr<Robot> robot = wr.lock();
+	for (const weak_ptr<Robot>& wr: robotlist) {
+		shared_ptr<Robot> robot = wr.lock();
 		if (!robot) continue;
 		b3SharedMemoryCommandHandle cmd = 0;
 		for (const shared_ptr<Joint>& j: robot->joints) {
@@ -414,8 +417,8 @@ void World::bullet_step(int skip_frames)
 
 void World::query_positions()
 {
-	for (const boost::weak_ptr<Robot>& r: robotlist) {
-		boost::shared_ptr<Robot> robot = r.lock();
+	for (const weak_ptr<Robot>& r: robotlist) {
+		shared_ptr<Robot> robot = r.lock();
 		if (!robot) continue;
 		query_body_position(robot);
 	}

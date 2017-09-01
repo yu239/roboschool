@@ -4,9 +4,10 @@
 #include <QtOpenGL/QtOpenGL>
 #include <QtGui/QKeyEvent>
 
-using boost::shared_ptr;
 using namespace SimpleRender;
 using namespace Household;
+using smart_pointer::shared_ptr;
+using smart_pointer::weak_ptr;
 
 Viz::Viz(const shared_ptr<Context>& cx_):
 	QOpenGLWidget()
@@ -470,7 +471,7 @@ bool Viz::event(QEvent* ev)
 
 QSize VizCamera::sizeHint() const
 {
-	boost::shared_ptr<Household::Camera> c = cref.lock();
+	shared_ptr<Household::Camera> c = cref.lock();
 	return QSize(4*MARGIN + 2*(c ? c->camera_res_w : 192)*3, 2*MARGIN + 2*(c ? c->camera_res_h : 128));
 }
 
@@ -478,7 +479,7 @@ void VizCamera::paintEvent(QPaintEvent* ev)
 {
 	QPainter p(this);
 	p.fillRect(ev->rect(), QColor(QRgb(0xFFFFFF)));
-	boost::shared_ptr<Household::Camera> camera = cref.lock();
+	shared_ptr<Household::Camera> camera = cref.lock();
 	if (!camera) return;
 	int w = camera->camera_res_w;
 	int h = camera->camera_res_h;
@@ -554,13 +555,13 @@ void VizCamera::paintEvent(QPaintEvent* ev)
 
 void Viz::activate_key_callback(int event_type, int key, int modifiers)
 {
-	boost::shared_ptr<KeyCallback> k = key_callback.lock();
+	shared_ptr<KeyCallback> k = key_callback.lock();
 	if (k) k->key_callback(event_type, key, modifiers);
 }
 
 void VizCamera::activate_key_callback(int event_type, int key, int modifiers)
 {
-	boost::shared_ptr<KeyCallback> k = key_callback.lock();
+	shared_ptr<KeyCallback> k = key_callback.lock();
 	if (k) k->key_callback(event_type, key, modifiers);
 }
 

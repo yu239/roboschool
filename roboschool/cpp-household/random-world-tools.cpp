@@ -2,6 +2,8 @@
 #include "assets.h"
 #include "render-simple.h"
 
+using smart_pointer::shared_ptr;
+
 namespace Household {
 
 #if 0

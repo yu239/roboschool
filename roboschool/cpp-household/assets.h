@@ -4,7 +4,8 @@
 #include <map>
 #include <list>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+
+#include "common.h"
 
 namespace SimpleRender {
 struct VAO;
@@ -16,8 +17,6 @@ class ContextViewport;
 struct App;
 
 namespace Household {
-
-using boost::shared_ptr;
 
 struct Material {
 	Material(const std::string& name): name(name)  { }
@@ -49,9 +48,9 @@ struct Shape {
 	enum { MESH, STATIC_MESH, CYLINDER, SPHERE, CAPSULE, BOX, DEBUG_LINES };
 	int primitive_type = MESH;
 
-	shared_ptr<Cylinder> cylinder;
-	shared_ptr<Sphere> sphere;
-	shared_ptr<Box> box;
+	smart_pointer::shared_ptr<Cylinder> cylinder;
+	smart_pointer::shared_ptr<Sphere> sphere;
+	smart_pointer::shared_ptr<Box> box;
 
 	bool converted_to_mesh = false;
 	void convert_primitive_to_mesh();
@@ -68,12 +67,12 @@ struct Shape {
 	void push_tex(btScalar u, btScalar v);
 	void push_lines(btScalar x, btScalar y, btScalar z);
 
-	shared_ptr<Material> material;
-	shared_ptr<SimpleRender::VAO> vao;
-	shared_ptr<SimpleRender::Buffer> buf_v;
-	shared_ptr<SimpleRender::Buffer> buf_n;
-	shared_ptr<SimpleRender::Buffer> buf_t;
-	shared_ptr<SimpleRender::Buffer> buf_l;
+	smart_pointer::shared_ptr<Material> material;
+	smart_pointer::shared_ptr<SimpleRender::VAO> vao;
+	smart_pointer::shared_ptr<SimpleRender::Buffer> buf_v;
+	smart_pointer::shared_ptr<SimpleRender::Buffer> buf_n;
+	smart_pointer::shared_ptr<SimpleRender::Buffer> buf_t;
+	smart_pointer::shared_ptr<SimpleRender::Buffer> buf_l;
 
 	Shape()  { origin.setIdentity(); }
 };
@@ -83,18 +82,18 @@ const int DETAIL_BEST   = 0;
 const int DETAIL_LOWER  = 1;
 
 struct MaterialNamespace {
-	std::map<std::string, shared_ptr<Material>> name2mtl;
+	std::map<std::string, smart_pointer::shared_ptr<Material>> name2mtl;
 };
 
 struct ShapeDetailLevels {
 	bool load_later_on = false;
 	std::string load_later_fn;
 	btTransform load_later_transform;
-	shared_ptr<MaterialNamespace> materials;
-	std::vector<shared_ptr<Shape>> detail_levels[DETAIL_LEVELS];
+	smart_pointer::shared_ptr<MaterialNamespace> materials;
+	std::vector<smart_pointer::shared_ptr<Shape>> detail_levels[DETAIL_LEVELS];
 };
 
-void load_model(const shared_ptr<ShapeDetailLevels>& result, const std::string& fn, btScalar scale, const btTransform& transform);
-bool load_collision_shape_from_OFF_files(const shared_ptr<ShapeDetailLevels>& result, const std::string& fn_template, btScalar scale, const btTransform& viz_frame);
+void load_model(const smart_pointer::shared_ptr<ShapeDetailLevels>& result, const std::string& fn, btScalar scale, const btTransform& transform);
+bool load_collision_shape_from_OFF_files(const smart_pointer::shared_ptr<ShapeDetailLevels>& result, const std::string& fn_template, btScalar scale, const btTransform& viz_frame);
 
 } // namespace Household
