@@ -14,8 +14,8 @@ class RoboschoolMujocoXmlEnv(gym.Env):
         'video.frames_per_second': 60
         }
 
-    VIDEO_W = 64  # for video showing the robot, not for camera ON the robot
-    VIDEO_H = 64
+    VIDEO_W = 400  # for video showing the robot, not for camera ON the robot
+    VIDEO_H = 400
 
     def __init__(self, model_xml, robot_name, action_dim, obs_dim):
         self.scene = None
@@ -45,7 +45,7 @@ class RoboschoolMujocoXmlEnv(gym.Env):
         self.frame = 0
         self.done = 0
         self.reward = 0
-        dump = 0
+        dump = 1
         for r in self.mjcf:
             if dump: print("ROBOT '%s'" % r.root_part.name)
             if r.root_part.name==self.robot_name:

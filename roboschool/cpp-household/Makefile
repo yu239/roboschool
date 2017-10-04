@@ -1,6 +1,8 @@
 UNAME := $(shell uname -s)
 OBJDIRR=.build-release
 OBJDIRD=.build-debug
+OBJDIRR_PY=.build-release-py
+OBJDIRD_PY=.build-debug-py
 
 ifeq ($(UNAME),Linux)
   PKG  =pkg-config
@@ -48,10 +50,12 @@ ifeq ($(UNAME),Darwin)
 endif
 
 $(info Link against python $(PYTHON))
-INC     += `$(PKG) --cflags Qt5Widgets Qt5OpenGL assimp python-$(PYTHON)`
-LIBS    += -lstdc++ `$(PKG) --libs Qt5OpenGL Qt5Widgets assimp python-$(PYTHON)`
+INC     += `$(PKG) --cflags Qt5Widgets Qt5OpenGL assimp`
+LIBS    += -lstdc++ `$(PKG) --libs Qt5OpenGL Qt5Widgets assimp`
 INC     += -Ibullet_local_install/include -Ibullet_local_install/include/bullet -I/usr/local/include/bullet
 LIBS    += $(RPATH) -Lbullet_local_install/lib -lLinearMath -lBullet3Common -lBulletCollision -lBulletDynamics -lBulletInverseDynamics -lPhysicsClientC_API
+INC_PY     += `$(PKG) --cflags python-$(PYTHON)`
+LIBS_PY    += `$(PKG) --libs python-$(PYTHON)`
 
 ifeq ($(PYTHON),2.7)
     BOOST_PYTHON = -lboost_python
@@ -61,7 +65,8 @@ endif
 
 CC=gcc-5
 LINK=gcc-5
-AR=ar r
+#AR=ar ru
+AR=ar rcs
 AR_OUT=
 LINK_OUT= -o
 MINUS_O = -o
@@ -71,7 +76,7 @@ CFLAGSD  = -std=c++11 -Wall -Wno-unused-variable -Wno-unused-function -Wno-depre
 SHARED  = -shared
 DEPENDS = -MMD -MF $@.dep
 
-EVERY_BIN=../robot-test-tool ../robot-test-tool_d ../cpp_household.so ../cpp_household_d.so
+EVERY_BIN=../robot-test-tool ../robot-test-tool_d ../cpp_household.so ../cpp_household_d.so ../libroboschool.so ../libroboschool_d.so
 
 SIM = \
  physics-bullet.cpp \
@@ -91,21 +96,34 @@ else
 $(info Slow hardware or software render (no shadows))
 endif
 
+CFLAGS_PY   = $(CFLAGS) $(INC_PY) -DBOOST_SMART_POINTER
+CFLAGSD_PY  = $(CFLAGSD) $(INC_PY) -DBOOST_SMART_POINTER 
+
 TWND = \
  test-tool-qt4.cpp
 
 PYTH = python-binding.cpp
+CPP = roboschool.cpp
 
 SIM_R = $(patsubst %.cpp, $(OBJDIRR)/%.o, $(SIM))
 SIM_D = $(patsubst %.cpp, $(OBJDIRD)/%.o, $(SIM))
+SIM_R_PY = $(patsubst %.cpp, $(OBJDIRR_PY)/%.o, $(SIM))
+SIM_D_PY = $(patsubst %.cpp, $(OBJDIRD_PY)/%.o, $(SIM))
 TWND_R = $(patsubst %.cpp, $(OBJDIRR)/%.o, $(TWND))
 TWND_D = $(patsubst %.cpp, $(OBJDIRD)/%.o, $(TWND))
-PYTH_R = $(patsubst %.cpp, $(OBJDIRR)/%.o, $(PYTH))
-PYTH_D = $(patsubst %.cpp, $(OBJDIRD)/%.o, $(PYTH))
+TWND_R_PY = $(patsubst %.cpp, $(OBJDIRR_PY)/%.o, $(TWND))
+TWND_D_PY = $(patsubst %.cpp, $(OBJDIRD_PY)/%.o, $(TWND))
+PYTH_R = $(patsubst %.cpp, $(OBJDIRR_PY)/%.o, $(PYTH))
+PYTH_D = $(patsubst %.cpp, $(OBJDIRD_PY)/%.o, $(PYTH))
+CPP_R = $(patsubst %.cpp, $(OBJDIRR)/%.o, $(CPP))
+CPP_D = $(patsubst %.cpp, $(OBJDIRD)/%.o, $(CPP))
 
-EVERY_OBJ_R = $(SIM_R) $(TWND_R) $(PYTH_R)
-EVERY_OBJ_D = $(SIM_D) $(TWND_D) $(PYTH_D)
+EVERY_OBJ_R_PY = $(SIM_R_PY) $(TWND_R_PY) $(PYTH_R)
+EVERY_OBJ_D_PY = $(SIM_D_PY) $(TWND_D_PY) $(PYTH_D)
+EVERY_OBJ_R = $(SIM_R) $(TWND_R) $(CPP_R)
+EVERY_OBJ_D = $(SIM_D) $(TWND_D) $(CPP_D)
 DEP = $(patsubst %.o,%.o.dep, $(EVERY_OBJ_R) $(EVERY_OBJ_D))
+DEP_PY = $(patsubst %.o,%.o.dep, $(EVERY_OBJ_R_PY) $(EVERY_OBJ_D_PY))
 
 all: dirs $(EVERY_BIN)
 
@@ -121,26 +139,40 @@ $(OBJDIRR)/test-tool-qt4.o: .generated/test-tool-qt4.moc
 ../robot-test-tool_d: $(SIM_D) $(TWND_D)
 	$(LINK) $(LINK_OUT)$@ $^ $(LIBS)
 
-../cpp_household.so: $(SIM_R) $(PYTH_R)
-	$(LINK) $(SHARED) $(LINK_OUT)$@ $^ $(LIBS) $(BOOST_PYTHON)
+../cpp_household.so: $(SIM_R_PY) $(PYTH_R)
+	$(LINK) $(SHARED) $(LINK_OUT)$@ $^ $(LIBS) $(LIBS_PY) $(BOOST_PYTHON)
 ../cpp_household_d.so: $(SIM_D) $(PYTH_D)
-	$(LINK) $(SHARED) $(LINK_OUT)$@ $^ $(LIBS) $(BOOST_PYTHON)
+	$(LINK) $(SHARED) $(LINK_OUT)$@ $^ $(LIBS) $(LIBS_PY) $(BOOST_PYTHON)
+
+../libroboschool.so: $(SIM_R) $(CPP_R)
+	$(LINK) $(SHARED) $(LINK_OUT)$@ $^ $(LIBS)
+
+../libroboschool_d.so: $(SIM_D) $(CPP_D)
+	$(LINK) $(SHARED) $(LINK_OUT)$@ $^ $(LIBS)
 
 $(OBJDIRR)/%.o: %.cpp
 	$(CC) $(CFLAGS) -c $<  $(MINUS_O)$@ $(DEPENDS)
 $(OBJDIRD)/%.o: %.cpp
 	$(CC) $(CFLAGSD) -c $<  $(MINUS_O)$@ $(DEPENDS)
 
+$(OBJDIRR_PY)/%.o: %.cpp
+	$(CC) $(CFLAGS_PY) -c $<  $(MINUS_O)$@ $(DEPENDS)
+$(OBJDIRD_PY)/%.o: %.cpp
+	$(CC) $(CFLAGSD_PY) -c $<  $(MINUS_O)$@ $(DEPENDS)
+
 .PHONY: depends clean dirs
 
 clean:
-	$(RM) $(EVERY_BIN) $(EVERY_OBJ_R) $(EVERY_OBJ_D) .generated/*.moc *.ilk *.pdb $(DEP)
+	$(RM) $(EVERY_BIN) $(EVERY_OBJ_R) $(EVERY_OBJ_D) $(EVERY_OBJ_R_PY) $(EVERY_OBJ_D_PY) $(PYTH_R) $(PYTH_D) $(CPP_R) $(CPP_D) .generated/*.moc *.ilk *.pdb $(DEP) $(DEP_PY)
 	rm -rf .generated
 	rm -rf $(OBJDIRD)
 	rm -rf $(OBJDIRR)
+	rm -rf $(OBJDIRD_PY)
+	rm -rf $(OBJDIRR_PY)
 
 depends:
 	cat  $(DEP) > Makefile.dep
+	cat  $(DEP_PY) > Makefile.dep
 
 .generated:
 	mkdir -p .generated
@@ -148,7 +180,12 @@ $(OBJDIRR):
 	mkdir -p $@
 $(OBJDIRD):
 	mkdir -p $@
+$(OBJDIRR_PY):
+	mkdir -p $@
+$(OBJDIRD_PY):
+	mkdir -p $@
 
-dirs: .generated $(OBJDIRR) $(OBJDIRD)
+dirs: .generated $(OBJDIRR) $(OBJDIRD) $(OBJDIRR_PY) $(OBJDIRD_PY)
+
 
 -include Makefile.dep

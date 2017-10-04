@@ -12,7 +12,7 @@ import sys
 import json
 
 class InputHandler:
-    def __init__(self, robot, pose, actions):
+    def __init__(self, robot, pose, maze_size, actions):
         """
         what to expect from InputHandler:
             1. the pose handler for the main robot
@@ -22,22 +22,30 @@ class InputHandler:
         self.init_step = 1
         self.robot = robot
         self.pose = pose
-        self.camera_phi = np.random.rand() * 2 * np.pi - np.pi
+        self.maze_size = maze_size
         self.speed_norm = 2.0
         self.speed = np.array([0.0, 0.0, 0.0])
         self.pitch_count = 0
-        self.camera_mode = False # true: use third person
+        self.camera_mode = 0 # 0: use first person
         self.actions = actions
+        self.num_bins = 8
+        self.camera_phi = np.random.randint(0, self.num_bins)
 
     def update_camera(self):
         x, y, z = self.pose.xyz()
-        if self.camera_mode:
+        if self.camera_mode == 2:
+            cz = 1
+            self.camera_pos = [
+                x, y, cz,
+                x, y, z
+            ]
+        elif self.camera_mode == 1:
             scale = 0.13
             self.camera_pos = [
                 x - self.speed_x * scale, y - self.speed_y * scale, z + 0.2,
                 x, y, z + 0.1
             ]
-        else:
+        elif self.camera_mode == 0:
             scale = 0.025
             self.camera_pos = [
                 x, y, z, x + self.speed_x, y + self.speed_y, z,
@@ -51,37 +59,37 @@ class InputHandler:
             4. 'd': turn right
             5. 'j': jump
         """
+        #print(self.actions)
         if self.init_step == 1:
             self.init_step = 0
             current_speed_z = 0.0
         else:
             self.pose = self.robot.pose()
             current_speed_z = self.robot.speed()[2]
+        #print (current_speed_z)
         # print (self.pose.xyz())
         if a[0] == 'a' and 'a' in self.actions:
-            self.camera_phi += np.pi / 6
+            self.camera_phi = (self.camera_phi + 1) % self.num_bins
         elif a[0] == 'd' and 'd' in self.actions:
-            self.camera_phi -= np.pi / 6
-        if self.camera_phi > np.pi:
-            self.camera_phi -= 2 * np.pi
-        if self.camera_phi < -np.pi:
-            self.camera_phi += 2 * np.pi
-        self.speed_x = self.speed_norm * np.cos(self.camera_phi)
-        self.speed_y = self.speed_norm * np.sin(self.camera_phi)
+            self.camera_phi = (self.camera_phi - 1) % self.num_bins
+        camera_rad = 2 * np.pi / self.num_bins * self.camera_phi
+        self.speed_x = self.speed_norm * np.cos(camera_rad)
+        self.speed_y = self.speed_norm * np.sin(camera_rad)
         self.speed = np.array([self.speed_x, self.speed_y, current_speed_z])
         self.update_camera()
         if a[0] == 'w' and 'w' in self.actions:
             self.pitch_count += 1
             self.pose.set_rpy(0.0, self.pitch_count * \
-                              self.speed_norm * 0.165 / np.pi, self.camera_phi)
+                              self.speed_norm * 0.165 / np.pi, camera_rad)
             self.robot.set_pose_and_speed(self.pose, *self.speed)
         else:
             self.pose.set_rpy(0.0, self.pitch_count * \
-                              self.speed_norm * 0.165 / np.pi, self.camera_phi)
+                              self.speed_norm * 0.165 / np.pi, camera_rad)
             self.robot.set_pose_and_speed(self.pose, 0., 0., current_speed_z)
+            #self.robot.set_pose_and_speed(self.pose, self.speed_x, self.speed_y, current_speed_z)
         collect = a[0] == 'c' and 'c' in self.actions
-        if a[0] == 'z': self.camera_mode = not self.camera_mode
-        if a[0] == 'j' and 'j' in self.actions and contacted:
+        if a[0] == 'z': self.camera_mode = (self.camera_mode+1) % 3
+        if a[0] == 'j' and 'j' in self.actions:
             self.speed = np.array([0., 0., 3.0])
             self.robot.set_pose_and_speed(self.pose, *self.speed)
         return collect
@@ -97,7 +105,7 @@ class SceneBuilder:
             1. parse what the scene_config builds
         """
         self.scene = scene
-        self.build_list, self.max_step, self.actions = scene_config(history)
+        self.build_list, self.max_step, self.actions, self.maze_size = scene_config(history)
         self.parse()
 
     def parse(self):
@@ -152,15 +160,15 @@ class SceneBuilder:
         return self.agent, apose, self.max_step, self.actions
 
     def step(self):
-        for i in range(len(self.m)):
-            mpose = cpp_household.Pose()
-            step_func = self.m[i][3]
-            x, y, z = self.m_list[i].pose().xyz()[0:3]
-            dx, dy, dz = self.m_list[i].speed()
-            x, y, z, dx, dy, dz = step_func(x, y, z, dx, dy, dz)
-            mpose.set_xyz(x, y, z)
-            mpose.set_rpy(0.0, 0.0, 0.0)
-            self.m_list[i].set_pose_and_speed(mpose, dx, dy, dz)
+       for i in range(len(self.m)):
+           mpose = cpp_household.Pose()
+           step_func = self.m[i][3]
+           x, y, z = self.m_list[i].pose().xyz()[0:3]
+           dx, dy, dz = self.m_list[i].speed()
+           x, y, z, dx, dy, dz = step_func(x, y, z, dx, dy, dz)
+           mpose.set_xyz(x, y, z)
+           mpose.set_rpy(0.0, 0.0, 0.0)
+           self.m_list[i].set_pose_and_speed(mpose, dx, dy, dz)
 
 
 class RoboschoolDemo(RoboschoolMujocoXmlEnv):
@@ -170,7 +178,7 @@ class RoboschoolDemo(RoboschoolMujocoXmlEnv):
         self.history = []
 
     def create_single_player_scene(self):
-        return SingleRobotEmptyScene(gravity=98 * 0.5, timestep=0.00165, frame_skip=1)
+        return SingleRobotEmptyScene(gravity=98, timestep=0.0165 / 4, frame_skip=1)
 
     def robot_specific_reset(self):
         # load the ground
@@ -183,11 +191,10 @@ class RoboschoolDemo(RoboschoolMujocoXmlEnv):
 
         self.scene_builder = SceneBuilder(self.scene, self.history)
         self.agent, apose, self.max_step, actions = self.scene_builder.build()
-        self.input_handler = InputHandler(self.agent, apose, actions)
+        self.input_handler = InputHandler(self.agent, apose, self.scene_builder.maze_size, actions)
         # set agent camera_phi
         goal = self.scene_builder.g[0]
         dx, dy = self.scene_builder.ax - goal[0], self.scene_builder.ay - goal[1]
-        self.input_handler.camera_phi = np.arctan2(-dy, -dx)
         self.step_count = 0
 
     def apply_action(self, a, contacted):
@@ -200,7 +207,7 @@ class RoboschoolDemo(RoboschoolMujocoXmlEnv):
         self.step_count += 1
         contact_list = self.agent.root_part.contact_list()
         collect = self.apply_action(a, len(contact_list) != 0)
-        for i in range(10):
+        for i in range(5):
             self.scene.global_step()
         goal_collected, cossim = self.goal_step(collect)
 
@@ -221,7 +228,7 @@ class RoboschoolDemo(RoboschoolMujocoXmlEnv):
             if g.alive == True:
                 done = 1
                 break
-        if self.step_count > self.max_step:
+        if self.max_step > 0 and self.step_count > self.max_step:
         # if self.step_count > 2048:
             done = 0
         # update history

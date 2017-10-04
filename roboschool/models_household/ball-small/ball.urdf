@@ -7,7 +7,7 @@
                 <!--
                 <mesh filename="ball.obj"/>
                 -->
-                <sphere radius="0.0000000000001"/>
+                <sphere radius="0.01"/>
             </geometry>
         </visual>
         <collision>

@@ -1,4 +1,4 @@
-j#include "render-glwidget.h"
+#include "render-glwidget.h"
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QCheckBox>
@@ -13,6 +13,7 @@ j#include "render-glwidget.h"
 #include <bullet/PhysicsClientC_API.h>
 
 using namespace Household;
+using smart_pointer::shared_ptr;
 
 namespace Household {
 btScalar SCALE = 1.0;

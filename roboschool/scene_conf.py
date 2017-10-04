@@ -39,50 +39,51 @@ def scene_config(history):
 
 max_dist = 2.1
 def random_maze_config(history):
+    maze_size = 10
     global max_dist
     if len(history) > 100:
         history.pop(0)
     if sum(history) > 95:
         del history[:]
         max_dist = max_dist + 1
-    pos_reg = np.zeros((5, 5), dtype=np.int8)
-    agent_x = np.random.randint(1, 6)
-    agent_y = np.random.randint(1, 6)
-    pos_reg[agent_x - 1][agent_y - 1] = 1
+    pos_reg = np.zeros((maze_size, maze_size), dtype=np.int8)
+    agent_x = np.random.randint(1, maze_size-1)
+    agent_y = np.random.randint(1, maze_size-1)
+    pos_reg[agent_x][agent_y] = 1
     while True:
-        goal_x = np.random.randint(1, 6)
-        goal_y = np.random.randint(1, 6)
+        goal_x = np.random.randint(1, maze_size-1)
+        goal_y = np.random.randint(1, maze_size-1)
         if goal_x != agent_x or goal_y != agent_y:
             current_dist = abs(goal_x - agent_x) + abs(goal_y - agent_y)
             if current_dist <= max_dist and current_dist > 1.1:
-                print ('[Dist Info] {:03d} / {:03d}'.format(current_dist,
-                    int(max_dist)))
-                sys.stdout.flush()
-                pos_reg[goal_x - 1][goal_y - 1] = 2
+                #print ('[Dist Info] {:03d} / {:03d}'.format(current_dist,
+                #    int(max_dist)))
+                #sys.stdout.flush()
+                pos_reg[goal_x][goal_y] = 2
                 break
     o_list = []
     while True:
         del o_list[:]
         pos_copy = pos_reg.copy()
-        for xx in range(5):
-            for yy in range(5):
+        for xx in range(1, maze_size-1):
+            for yy in range(1, maze_size-1):
                 if pos_reg[xx][yy] != 0:
                     continue
-                if np.random.rand() > 0.3:
+                if np.random.rand() > 0.2:
                     continue
                 o_list.append([xx, yy])
                 pos_copy[xx][yy] = 3
         reachable = False
-        conn_list = [[agent_x - 1, agent_y - 1], ]
-        conn_vist = np.zeros((5, 5), dtype=np.int8)
+        conn_list = [[agent_x, agent_y], ]
+        conn_vist = np.zeros((maze_size, maze_size), dtype=np.int8)
         while len(conn_list) > 0:
             x, y = conn_list.pop(0)
             if conn_vist[x][y] > 0:
                 continue
             conn_vist[x][y] = 1
-            xxyy = [[x - 1, y], [x + 1, y], [x, y - 1], [x,  y + 1]]
+            xxyy = [[x, y-1], [x, y+1], [x-1, y], [x+1,  y]]
             for xx, yy in xxyy:
-                if xx < 0 or xx >= 5 or yy < 0 or yy >= 5:
+                if xx < 1 or xx >= maze_size-1 or yy < 1 or yy >= maze_size-1:
                     continue
                 if pos_copy[xx][yy] == 0:
                     conn_list.append([xx, yy])
@@ -95,13 +96,13 @@ def random_maze_config(history):
             break
     ret_list = []
     ret_list.append([goal_x, goal_y, 0, 'goal', None, 'models_household/apple/apple.urdf'])
-    ret_list.append([agent_x, agent_y, 0, 'agent', None, 'models_household/ball-small/ball.urdf'])
-    for i in range(1, 6):
+    ret_list.append([agent_x, agent_y, 0, 'agent', None, 'models_household/ball/ball.urdf'])
+    for i in range(1, maze_size):
         ret_list.append([0, i, 0., 'block', step_function, 'models_household/block/block.urdf'])
         ret_list.append([i, 0, 0., 'block', step_function, 'models_household/block/block.urdf'])
-        ret_list.append([6, i, 0., 'block', step_function, 'models_household/block/block.urdf'])
-        ret_list.append([i, 6, 0., 'block', step_function, 'models_household/block/block.urdf'])
+        ret_list.append([maze_size-1, i, 0., 'block', step_function, 'models_household/block/block.urdf'])
+        ret_list.append([i, maze_size-1, 0., 'block', step_function, 'models_household/block/block.urdf'])
     for o in o_list:
-        ret_list.append([o[0] + 1, o[1] + 1, 0, 'movable', step_function, 'models_household/cube/cube.urdf'])
+        ret_list.append([o[0], o[1], 0, 'movable', step_function, 'models_household/cube/cube.urdf'])
     # return: the object list, the maximum step allowed, and the actions allowed
-    return ret_list, 10 + 200 * (current_dist - 1), ['a', 'w', 'd', 'c', 'z']
+    return ret_list, 0, ['a', 'w', 'd', 'c', 'z', 'j'], maze_size
