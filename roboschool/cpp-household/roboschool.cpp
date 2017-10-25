@@ -30,16 +30,20 @@ namespace Household {
 struct App {
     static shared_ptr<App> instance(const shared_ptr<Household::World>& wref) {
         static shared_ptr<App> instance(make_shared<App>(wref));
+        printf("@@@@@@@@@@@@@ App instance %ld\n", instance.use_count());
         wref->app_ref = instance;
+        printf("@@@@@@@@@@@@@ App wref->app_ref %ld\n", wref->app_ref.use_count());
 
         return instance;
     }
 
-    ~App() {
+    virtual ~App() {
+        printf("@@@@@@@@@@@@@ App destruct\n");
         delete app_;
     }
 
     App(const shared_ptr<Household::World>& wref) {
+        printf("@@@@@@@@@@@@@ App construct\n");
         SimpleRender::opengl_init_before_app(wref);
         static int argc = 1;
         static const char* argv[] = { "Roboschool Simulator" };
@@ -47,7 +51,6 @@ struct App {
         app_ = new QApplication(argc, const_cast<char**>(argv));
         SimpleRender::opengl_init(wref->cx);
     }
-
 
     QApplication* app_;
 };
@@ -474,7 +477,13 @@ class CameraImpl {
 public:
     CameraImpl(const shared_ptr<Household::Camera>& cref,
                const weak_ptr<Household::World>& wref) :
-            cref(cref), wref(wref) {}
+            cref(cref), wref(wref), app(nullptr) {}
+
+    ~CameraImpl() {
+        printf("@@@@@@@@@@@@@  CameraImpl destructor begins\n");
+        app.reset();
+        printf("@@@@@@@@@@@@@  CameraImpl destructor ends\n");
+    }
 
     std::string name() {
         return cref->camera_name;
@@ -514,6 +523,7 @@ public:
 private:
     shared_ptr<Household::Camera> cref;
     weak_ptr<Household::World> wref;
+    shared_ptr<App> app;
 };
 
 RenderResult CameraImpl::render(bool render_depth,
@@ -521,7 +531,9 @@ RenderResult CameraImpl::render(bool render_depth,
                                 bool print_timing) {
     auto world = wref.lock();
     assert(world);
-    shared_ptr<App> app = App::instance(world);
+    if (!app) {
+        app = App::instance(world);
+    }
 
     cref->camera_render(
             world->cx, render_depth, render_labeling, print_timing);

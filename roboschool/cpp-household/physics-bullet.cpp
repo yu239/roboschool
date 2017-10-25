@@ -37,6 +37,7 @@ void World::bullet_init(float gravity, float timestep)
 
 World::~World()
 {
+	printf("@@@@@@@@@@ household::World destructor begins\n");
 #ifdef CHROME_TRACING
 	if (chrome_trace_log!=-1) {
 		fprintf(stderr, "Stop chrome trace log, handle %i\n", chrome_trace_log);
@@ -47,6 +48,7 @@ World::~World()
 	}
 #endif
 	b3DisconnectSharedMemory(client);
+	printf("@@@@@@@@@@ household::World destructor ends\n");
 }
 
 void World::settings_apply()

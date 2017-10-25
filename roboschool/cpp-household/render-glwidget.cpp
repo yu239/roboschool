@@ -12,6 +12,7 @@ using smart_pointer::weak_ptr;
 Viz::Viz(const shared_ptr<Context>& cx_):
 	QOpenGLWidget()
 {
+	printf("@@@@@@@@@@@@@@@ Viz construct\n");
 	cx = cx_;
 	//setFormat(cx->fmt);
 	setFocusPolicy(Qt::StrongFocus);
