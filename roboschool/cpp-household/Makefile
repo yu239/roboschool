@@ -29,7 +29,7 @@ ifeq ($(UNAME),Linux)
     $(info Linux, python 2 branch)
     PYTHON = $(shell python -c "import sys; print('%i.%i' % sys.version_info[:2])")
   endif
-  RPATH=-Wl,-z,origin -Wl,--disable-new-dtags -Wl,-rpath,'$$ORIGIN/cpp-household/bullet_local_install/lib'
+  RPATH=-Wl,-z,origin -Wl,--disable-new-dtags -Wl,-rpath,
 endif
 
 ifeq ($(UNAME),Darwin)
@@ -50,10 +50,10 @@ ifeq ($(UNAME),Darwin)
 endif
 
 $(info Link against python $(PYTHON))
-INC     += `$(PKG) --cflags Qt5Widgets Qt5OpenGL assimp`
-LIBS    += -lstdc++ `$(PKG) --libs Qt5OpenGL Qt5Widgets assimp`
-INC     += -Ibullet_local_install/include -Ibullet_local_install/include/bullet -I/usr/local/include/bullet
-LIBS    += $(RPATH) -Lbullet_local_install/lib -lLinearMath -lBullet3Common -lBulletCollision -lBulletDynamics -lBulletInverseDynamics -lPhysicsClientC_API
+INC     += `$(PKG) --cflags Qt5Widgets Qt5OpenGL`
+LIBS    += -lstdc++ $(RPATH) `$(PKG) --libs Qt5OpenGL Qt5Widgets`
+INC     += $(INCLUDE_FLAGS)
+LIBS    += $(LIB_FLAGS)
 INC_PY     += `$(PKG) --cflags python-$(PYTHON)`
 LIBS_PY    += `$(PKG) --libs python-$(PYTHON)`
 
@@ -97,7 +97,7 @@ $(info Slow hardware or software render (no shadows))
 endif
 
 CFLAGS_PY   = $(CFLAGS) $(INC_PY) -DBOOST_SMART_POINTER
-CFLAGSD_PY  = $(CFLAGSD) $(INC_PY) -DBOOST_SMART_POINTER 
+CFLAGSD_PY  = $(CFLAGSD) $(INC_PY) -DBOOST_SMART_POINTER
 
 TWND = \
  test-tool-qt4.cpp
