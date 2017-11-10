@@ -87,6 +87,8 @@ private:
 /*********************************** Thingy ***********************************/
 class Thingy {
 public:
+    Thingy() : impl_(nullptr) {}
+
     Thingy(const smart_pointer::shared_ptr<ThingyImpl>& impl) : impl_(impl) {}
 
     Pose pose() const;

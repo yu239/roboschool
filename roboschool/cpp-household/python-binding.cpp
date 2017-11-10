@@ -130,7 +130,6 @@ struct App {
 
 	App()
 	{
-		printf("@@@@@@@@@@@ App construct\n");
 		static int argc = 1;
 		static const char* argv[] = { "Roboschool Simulator" };
 		QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
@@ -140,10 +139,8 @@ struct App {
 
 	virtual ~App()
 	{
-		printf("@@@@@@@@@@@@@ App destruct begins\n");
 		delete loop;
 		delete app;
-		printf("@@@@@@@@@@@ App destruct ends\n");
 	}
 
 	void process_events()
@@ -166,7 +163,6 @@ shared_ptr<App> app_create_as_needed(const shared_ptr<Household::World>& wref)
 	the_app = app;
 	SimpleRender::opengl_init(wref->cx);
 	wref->app_ref = app;
-	printf("@@@@@@@@@@@@@@@ App instance %ld\n", wref->app_ref.use_count());
 	return app;
 }
 
@@ -192,7 +188,6 @@ struct Camera {
 
 	bool test_window()
 	{
-		printf("@@@@@@@@@@ Camera test_window\n");
 		if (window) {
 			if (!window->isVisible()) return false;
 			window->update();
@@ -220,10 +215,8 @@ struct Camera {
 
 	~Camera()
 	{
-		printf("@@@@@@@@@@@@@ Camera destruct begins\n");
 		delete window;
 		app.reset();
-		printf("@@@@@@@@@@@@@ Camera destruct ends\n");
 	}
 
 	void set_pose(const Pose& p) { cref->camera_pose = p.convert_to_bt_transform(); }
@@ -233,7 +226,6 @@ struct Camera {
 
 	boost::python::object render(bool render_depth, bool render_labeling, bool print_timing)
 	{
-		printf("@@@@@@@@@@@ Camera::render\n");
 		if (!app) app = app_create_as_needed(wref);
 		cref->camera_render(wref->cx, render_depth, render_labeling, print_timing);
 		return make_tuple(
@@ -310,9 +302,7 @@ struct World {
 
 	~World()
 	{
-		printf("@@@@@@@@@@@@ World destruct begins\n");
 		delete window;
-		printf("@@@@@@@@@@@@ World destruct ends\n");
 	}
 
 	void clean_everything() { wref->clean_everything(); }
@@ -407,7 +397,6 @@ struct World {
 
 	bool test_window()
 	{
-		printf("@@@@@@@@@@ World test_window\n");
 		if (!app) app = app_create_as_needed(wref);
 		if (window) {
 			app->process_events();

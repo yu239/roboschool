@@ -30,20 +30,16 @@ namespace Household {
 struct App {
     static shared_ptr<App> instance(const shared_ptr<Household::World>& wref) {
         static shared_ptr<App> instance(make_shared<App>(wref));
-        printf("@@@@@@@@@@@@@ App instance %ld\n", instance.use_count());
         wref->app_ref = instance;
-        printf("@@@@@@@@@@@@@ App wref->app_ref %ld\n", wref->app_ref.use_count());
 
         return instance;
     }
 
     virtual ~App() {
-        printf("@@@@@@@@@@@@@ App destruct\n");
         delete app_;
     }
 
     App(const shared_ptr<Household::World>& wref) {
-        printf("@@@@@@@@@@@@@ App construct\n");
         SimpleRender::opengl_init_before_app(wref);
         static int argc = 1;
         static const char* argv[] = { "Roboschool Simulator" };
@@ -480,9 +476,7 @@ public:
             cref(cref), wref(wref), app(nullptr) {}
 
     ~CameraImpl() {
-        printf("@@@@@@@@@@@@@  CameraImpl destructor begins\n");
         app.reset();
-        printf("@@@@@@@@@@@@@  CameraImpl destructor ends\n");
     }
 
     std::string name() {
