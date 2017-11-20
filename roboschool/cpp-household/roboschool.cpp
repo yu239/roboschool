@@ -100,31 +100,20 @@ Pose PoseImpl::dot(const Pose& p1, const Pose& p2) {
                                   to_bt_transform(p2)));
 }
 
-inline std::tuple<double,double,double> Pose::xyz() {
+std::tuple<double,double,double> Pose::xyz() {
     return std::make_tuple(x_ / SCALE, y_ / SCALE, z_ / SCALE);
 }
 
-inline void Pose::set_xyz(double x, double y, double z) {
-        x_ = x * SCALE;
-        y_ = y * SCALE;
-        z_ = z * SCALE;
-    }
+void Pose::set_xyz(double x, double y, double z) {
+    x_ = x * SCALE;
+    y_ = y * SCALE;
+    z_ = z * SCALE;
+}
 
-inline void Pose::move_xyz(double x, double y, double z) {
+void Pose::move_xyz(double x, double y, double z) {
     x_ += x * SCALE;
     y_ += y * SCALE;
     z_ += z * SCALE;
-}
-
-std::tuple<double,double,double,double> Pose::quatertion() {
-    return std::make_tuple(qx_, qy_, qz_, qw_);
-}
-
-inline void Pose::set_quaternion(double x, double y, double z, double w) {
-    qx_ = x;
-    qy_ = y;
-    qz_ = z;
-    qw_ = w;
 }
 
 std::tuple<double,double,double> Pose::rpy() {
@@ -154,11 +143,11 @@ void Pose::set_rpy(double r, double p, double y) {
     qz_ = t1 * t2 * t4 - t0 * t3 * t5;
 }
 
-inline void Pose::rotate_z(double angle) {
+void Pose::rotate_z(double angle) {
     PoseImpl::rotate_z(*this, angle);
 }
 
-inline Pose Pose::dot(const Pose& other) {
+Pose Pose::dot(const Pose& other) {
     return PoseImpl::dot(*this, other);
 }
 
@@ -242,8 +231,6 @@ std::vector<shared_ptr<ThingyImpl>> ThingyImpl::contact_list() {
     return r;
 }
 
-Pose Thingy::pose() const { return impl_->pose(); }
-
 inline std::tuple<double,double,double> Thingy::speed() {
     return impl_->speed();
 }
@@ -269,6 +256,8 @@ inline void Thingy::set_multiply_color(const std::string& tex, uint32_t c) {
 inline void Thingy::assign_metaclass(uint8_t mclass) {
     impl_->assign_metaclass(mclass);
 }
+
+Pose Thingy::pose() const { return impl_->pose(); }
 
 std::vector<Thingy> Thingy::contact_list() {
     std::vector<shared_ptr<ThingyImpl>> tlist = impl_->contact_list();
@@ -427,7 +416,8 @@ void ObjectImpl::destroy() {
 void Object::destroy() {
     impl_->destroy();
 }
-inline Thingy Object::root_part() {
+
+Thingy Object::root_part() {
     return impl_->root_part();
 }
 
@@ -439,7 +429,7 @@ void Object::set_pose(const Pose& p) {
     impl_->set_pose(p);
 }
 
-inline void Object::speed(double& vx, double& vy, double& vz) const {
+void Object::speed(double& vx, double& vy, double& vz) const {
     impl_->speed(vx, vy, vz);
 }
 
@@ -550,11 +540,11 @@ void CameraImpl::move_and_look_at(double from_x, double from_y, double from_z,
     set_pose(pose);
 }
 
-inline std::string Camera::name() {
+std::string Camera::name() {
     return impl_->name();
 }
 
-inline std::tuple<int,int> Camera::resolution() {
+std::tuple<int,int> Camera::resolution() {
     return impl_->resolution();
 }
 
@@ -562,19 +552,19 @@ Pose Camera::pose() {
     return impl_->pose();
 }
 
-inline void Camera::set_pose(const Pose& p) {
+void Camera::set_pose(const Pose& p) {
     impl_->set_pose(p);
 }
 
-inline void Camera::set_hfov(double hor_fov) {
+void Camera::set_hfov(double hor_fov) {
     impl_->set_hfov(hor_fov);
 }
 
-inline void Camera::set_near(double near) {
+void Camera::set_near(double near) {
     impl_->set_near(near);
 }
 
-inline void Camera::set_far(double far) {
+void Camera::set_far(double far) {
     impl_->set_far(far);
 }
 
@@ -731,7 +721,7 @@ std::vector<Object> World::load_mjcf(const std::string& fn) {
     return impl_->load_mjcf(fn);
 }
 
-inline double World::ts() {
+double World::ts() {
     return impl_->ts();
 }
 

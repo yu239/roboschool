@@ -84,6 +84,17 @@ private:
     double qx_, qy_, qz_, qw_;
 };
 
+inline std::tuple<double,double,double,double> Pose::quatertion() {
+    return std::make_tuple(qx_, qy_, qz_, qw_);
+}
+
+inline void Pose::set_quaternion(double x, double y, double z, double w) {
+    qx_ = x;
+    qy_ = y;
+    qz_ = z;
+    qw_ = w;
+}
+
 /*********************************** Thingy ***********************************/
 class Thingy {
 public:
