@@ -28,7 +28,8 @@ struct ThingyClass {
     smart_pointer::shared_ptr<ShapeDetailLevels> shapedet_visual;
     smart_pointer::shared_ptr<ShapeDetailLevels> shapedet_collision;
 
-    smart_pointer::shared_ptr<ThingyClass> modified_from_class; // it's there for static_mesh
+    // it's there for static_mesh
+    smart_pointer::shared_ptr<ThingyClass> modified_from_class;
 };
 
 struct Thingy {
@@ -36,14 +37,22 @@ struct Thingy {
 
     std::string name;
     int visibility_123 = 0;
-    //btScalar highest_point = 0; // for initial setup, to put other thingy on top
+    // for initial setup, to put other thingy on top
+    //btScalar highest_point = 0;
 
-    Thingy()  { bullet_position.setIdentity(); bullet_link_position.setIdentity(); bullet_local_inertial_frame.setIdentity(); }
-    ~Thingy()  { remove_from_bullet(); }
+    Thingy() {
+        bullet_position.setIdentity();
+        bullet_link_position.setIdentity();
+        bullet_local_inertial_frame.setIdentity();
+    }
+
+    ~Thingy() { remove_from_bullet(); }
     void remove_from_bullet();
-    bool is_sleeping()  { return false; }
+    bool is_sleeping() { return false; }
 
-    void set_multiply_color(const std::string& tex, uint32_t* color, std::string* replace_texture);
+    void set_multiply_color(const std::string& tex,
+                            uint32_t* color,
+                            std::string* replace_texture);
 
     bool bullet_ignore = false;
     int bullet_handle = -1;
@@ -55,7 +64,9 @@ struct Thingy {
     btVector3   bullet_speed;
     btVector3   bullet_angular_speed;
     bool bullet_queried_at_least_once = false;
-    //std::list<smart_pointer::shared_ptr<Thingy>> subobjects_keepalive; // subobjects shouldn't be destroyed before parent (right order is parent first), nonempty only in robots with joints
+    // subobjects shouldn't be destroyed before parent (right order is parent
+    // first), nonempty only in robots with joints
+    //std::list<smart_pointer::shared_ptr<Thingy>> subobjects_keepalive;
 };
 
 struct Joint {
@@ -116,9 +127,13 @@ struct Camera {
     std::string camera_labeling_mask;
 
     smart_pointer::shared_ptr<SimpleRender::ContextViewport> viewport;
-    void camera_render(const smart_pointer::shared_ptr<SimpleRender::Context>& cx, bool render_depth, bool render_labeling, bool print_timing);
+    void camera_render(
+            const smart_pointer::shared_ptr<SimpleRender::Context>& cx,
+            bool render_depth,
+            bool render_labeling,
+            bool print_timing);
 
-    Camera()  { camera_pose.setIdentity(); }
+    Camera() { camera_pose.setIdentity(); }
 };
 
 struct Robot {
@@ -128,12 +143,17 @@ struct Robot {
     std::vector<smart_pointer::shared_ptr<Thingy>> robot_parts;
     std::vector<smart_pointer::shared_ptr<Joint>> joints;
     std::vector<smart_pointer::shared_ptr<Camera>> cameras;
-    //void replace_texture(const std::string& material_name, const std::string& new_jpeg_png);
+    //void replace_texture(
+    //        const std::string& material_name, const std::string& new_jpeg_png);
 };
 
 struct World: smart_pointer::enable_shared_from_this<World> {
     b3PhysicsClientHandle client;
-    smart_pointer::shared_ptr<App> app_ref; // Keep application alive, while some worlds exist. If no worlds exist then new world gets created, probably will crash :(
+    smart_pointer::shared_ptr<App> app_ref; // Keep application alive, while
+                                            // some worlds exist. If no worlds
+                                            // exist then new world gets created,
+                                            // probably will crash :(
+    std::
     ~World();
 
     float settings_gravity          = 0;
@@ -144,7 +164,8 @@ struct World: smart_pointer::enable_shared_from_this<World> {
 
     //std::set<smart_pointer::weak_ptr<ThingyClass>> classes;
     std::map<std::string, smart_pointer::weak_ptr<ThingyClass>> klass_cache;
-    smart_pointer::shared_ptr<ThingyClass> klass_cache_find_or_create(const std::string& kname);
+    smart_pointer::shared_ptr<ThingyClass> klass_cache_find_or_create(
+            const std::string& kname);
     void klass_cache_clear();
 
     std::vector<smart_pointer::weak_ptr<Robot>> robotlist;
@@ -162,42 +183,43 @@ struct World: smart_pointer::enable_shared_from_this<World> {
     void query_positions();
     void query_body_position(const smart_pointer::shared_ptr<Robot>& robot);
 
-    std::list<smart_pointer::shared_ptr<Household::Thingy>> bullet_contact_list(const smart_pointer::shared_ptr<Thingy>& t);
+    std::list<smart_pointer::shared_ptr<Household::Thingy>> bullet_contact_list(
+            const smart_pointer::shared_ptr<Thingy>& t);
     double performance_bullet_ms;
 
-    smart_pointer::shared_ptr<Thingy> load_thingy(const std::string& the_filename, const btTransform& tr, float scale, float mass, uint32_t color, bool decoration_only);
-    smart_pointer::shared_ptr<Robot> load_urdf(const std::string& fn, const btTransform& tr, bool fixed_base, bool self_collision);
-    std::list<smart_pointer::shared_ptr<Robot>> load_sdf_mjcf(const std::string& fn, bool mjcf);
+    smart_pointer::shared_ptr<Thingy> load_thingy(
+            const std::string& the_filename,
+            const btTransform& tr,
+            float scale,
+            float mass,
+            uint32_t color,
+            bool decoration_only);
+    smart_pointer::shared_ptr<Robot> load_urdf(const std::string& fn,
+                                               const btTransform& tr,
+                                               bool fixed_base,
+                                               bool self_collision);
+    std::list<smart_pointer::shared_ptr<Robot>> load_sdf_mjcf(
+            const std::string& fn, bool mjcf);
     void load_robot_shapes(const smart_pointer::shared_ptr<Robot>& robot);
-    void load_robot_joints(const smart_pointer::shared_ptr<Robot>& robot, const std::string& origin_fn);
+    void load_robot_joints(const smart_pointer::shared_ptr<Robot>& robot,
+                           const std::string& origin_fn);
 
-    void robot_move(const smart_pointer::shared_ptr<Robot>& robot, const btTransform& tr, const btVector3& speed);
+    void robot_move(const smart_pointer::shared_ptr<Robot>& robot,
+                    const btTransform& tr,
+                    const btVector3& speed);
 
-    smart_pointer::shared_ptr<Thingy> debug_rect(btScalar x1, btScalar y1, btScalar x2, btScalar y2, btScalar h, uint32_t color);
-    smart_pointer::shared_ptr<Thingy> debug_line(btScalar x1, btScalar y1, btScalar z1, btScalar x2, btScalar y2, btScalar z2, uint32_t color);
-    smart_pointer::shared_ptr<Thingy> debug_sphere(btScalar x, btScalar y, btScalar z, btScalar rad, uint32_t color);
-
-//  smart_pointer::shared_ptr<MaterialNamespace> textures_cache;
-//  smart_pointer::shared_ptr<Material> texture_from_file_cached(const std::string& tex_fn);
-
-//  smart_pointer::shared_ptr<Thingy> tool_wall(
-//      btScalar grid_size, float tex1, float tex_v_zero,
-//      const std::vector<btScalar>& path,
-//      bool closed,
-//      const std::vector<btScalar>& low,
-//      const std::vector<btScalar>& high,
-//      const std::string& side_tex, float side_tex_scale,
-//      const std::string& top_tex,  float top_tex_scale,
-//      const std::string& bottom_tex, float bott_tex_scale,
-//      const std::string& but_tex,  float butt_tex_scale);
-//  smart_pointer::shared_ptr<Thingy> tool_quad_prism(
-//      float tex1, float tex_v_zero,
-//      std::vector<btScalar>& path,
-//      btScalar low,
-//      btScalar high,
-//      const std::string& side_tex_,
-//      const std::string& top_tex_,
-//      const std::string& bottom_tex_);
+    smart_pointer::shared_ptr<Thingy> debug_rect(
+            btScalar x1, btScalar y1, btScalar x2, btScalar y2,
+            btScalar h,
+            uint32_t color);
+    smart_pointer::shared_ptr<Thingy> debug_line(
+            btScalar x1, btScalar y1, btScalar z1,
+            btScalar x2, btScalar y2, btScalar z2,
+            uint32_t color);
+    smart_pointer::shared_ptr<Thingy> debug_sphere(
+            btScalar x, btScalar y, btScalar z,
+            btScalar rad,
+            uint32_t color);
 };
 
 } // namespace Household
