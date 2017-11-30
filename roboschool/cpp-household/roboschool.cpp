@@ -116,7 +116,7 @@ void Pose::move_xyz(double x, double y, double z) {
     z_ += z * SCALE;
 }
 
-std::tuple<double,double,double> Pose::rpy() {
+std::tuple<double,double,double> Pose::rpy() const {
     double sqw = qw_ * qw_;
     double sqx = qx_ * qx_;
     double sqy = qy_ * qy_;

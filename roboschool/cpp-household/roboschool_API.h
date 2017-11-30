@@ -71,7 +71,7 @@ public:
 
     void set_quaternion(double x, double y, double z, double w);
 
-    std::tuple<double,double,double> rpy();
+    std::tuple<double,double,double> rpy() const;
 
     void set_rpy(double r, double p, double y);
 

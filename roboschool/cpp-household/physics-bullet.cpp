@@ -79,6 +79,7 @@ shared_ptr<Robot> World::load_urdf(const std::string& fn, const btTransform& tr,
 	b3LoadUrdfCommandSetStartPosition(command, tr.getOrigin()[0], tr.getOrigin()[1], tr.getOrigin()[2]);
 	b3LoadUrdfCommandSetStartOrientation(command, tr.getRotation()[0], tr.getRotation()[1], tr.getRotation()[2], tr.getRotation()[3]);
 	b3LoadUrdfCommandSetUseFixedBase(command, fixed_base);
+	//b3LoadUrdfCommandSetUseMultiBody(command, false);
 	if (self_collision)
 		b3LoadUrdfCommandSetFlags(command, URDF_USE_SELF_COLLISION|URDF_USE_SELF_COLLISION_EXCLUDE_ALL_PARENTS);
 	b3SharedMemoryStatusHandle statusHandle = b3SubmitClientCommandAndWaitStatus(client, command);
