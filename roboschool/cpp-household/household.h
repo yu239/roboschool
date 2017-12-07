@@ -1,6 +1,9 @@
 #pragma once
-#include "assets.h"
+
+#include <map>
 #include <bullet/PhysicsClientC_API.h>
+
+#include "assets.h"
 
 namespace Household {
 
@@ -153,7 +156,6 @@ struct World: smart_pointer::enable_shared_from_this<World> {
                                             // some worlds exist. If no worlds
                                             // exist then new world gets created,
                                             // probably will crash :(
-    std::
     ~World();
 
     float settings_gravity          = 0;

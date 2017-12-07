@@ -67,6 +67,7 @@ void World::clean_everything() {
     settings_apply();
     // klass_cache -- leave it alone, it contains visual shapes useful for quick
     // restart, klass_cache_clear() if you need reload
+    // cache_model_file -- keep it for fast reloading
 }
 
 shared_ptr<Robot> World::load_urdf(const std::string& fn,
@@ -108,11 +109,11 @@ shared_ptr<Robot> World::load_urdf(const std::string& fn,
     return robot;
 }
 
-std::list<shared_ptr<Robot>> World::load_sdf_mjcf(
-        const std::string& fn, bool mjcf) {
+std::list<shared_ptr<Robot>> World::load_sdf_mjcf(const std::string& fn,
+                                                  bool mjcf) {
     std::list<shared_ptr<Robot>> ret;
-    const int MAX_SDF_BODIES = 512;
-    int bodyIndicesOut[MAX_SDF_BODIES];
+    const int max_sdf_bodies = 512;
+    int bodyIndicesOut[max_sdf_bodies];
     int N;
     if (mjcf) {
         b3SharedMemoryCommandHandle command =
@@ -126,7 +127,7 @@ std::list<shared_ptr<Robot>> World::load_sdf_mjcf(
             fprintf(stderr, "'%s': cannot load MJCF.\n", fn.c_str());
             return ret;
         }
-        N = b3GetStatusBodyIndices(status, bodyIndicesOut, MAX_SDF_BODIES);
+        N = b3GetStatusBodyIndices(status, bodyIndicesOut, max_sdf_bodies);
     } else {
         b3SharedMemoryCommandHandle command =
                 b3LoadSdfCommandInit(client, fn.c_str());
@@ -136,9 +137,9 @@ std::list<shared_ptr<Robot>> World::load_sdf_mjcf(
             fprintf(stderr, "'%s': cannot load SDF.\n", fn.c_str());
             return ret;
         }
-        N = b3GetStatusBodyIndices(status, bodyIndicesOut, MAX_SDF_BODIES);
+        N = b3GetStatusBodyIndices(status, bodyIndicesOut, max_sdf_bodies);
     }
-    if (N > MAX_SDF_BODIES) {
+    if (N > max_sdf_bodies) {
         fprintf(stderr, "'%s': too many bodies (%i).\n", fn.c_str(), N);
     }
     for (int c=0; c<N; c++) {
