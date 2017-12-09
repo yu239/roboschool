@@ -198,11 +198,13 @@ struct World: smart_pointer::enable_shared_from_this<World> {
             bool decoration_only);
     smart_pointer::shared_ptr<Robot> load_urdf(const std::string& fn,
                                                const btTransform& tr,
+                                               float scale,
                                                bool fixed_base,
                                                bool self_collision);
     std::list<smart_pointer::shared_ptr<Robot>> load_sdf_mjcf(
             const std::string& fn, bool mjcf);
-    void load_robot_shapes(const smart_pointer::shared_ptr<Robot>& robot);
+    void load_robot_shapes(const smart_pointer::shared_ptr<Robot>& robot,
+                           float scale);
     void load_robot_joints(const smart_pointer::shared_ptr<Robot>& robot,
                            const std::string& origin_fn);
 

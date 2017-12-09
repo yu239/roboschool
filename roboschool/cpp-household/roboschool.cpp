@@ -22,11 +22,6 @@ using smart_pointer::make_shared;
 
 extern std::string glsl_path;
 
-namespace Household {
-    btScalar SCALE = 1.0;
-    btScalar COLLISION_MARGIN = 0.002*SCALE;
-}
-
 struct App {
     static shared_ptr<App> instance(const shared_ptr<Household::World>& wref) {
         static shared_ptr<App> instance(make_shared<App>(wref));
@@ -53,9 +48,6 @@ struct App {
 
 namespace roboschool {
 
-const double SCALE = Household::SCALE;
-const double COLLISION_MARGIN = Household::COLLISION_MARGIN;
-
 /************************************ Pose ************************************/
 class PoseImpl {
 public:
@@ -72,9 +64,9 @@ Pose PoseImpl::from_bt_transform(const btTransform& tr) {
     btVector3 t = tr.getOrigin();
     btQuaternion q = tr.getRotation();
     Pose p;
-    p.set_xyz(double(t.x() / SCALE),
-              double(t.y() / SCALE),
-              double(t.z() / SCALE));
+    p.set_xyz(double(t.x()),
+              double(t.y()),
+              double(t.z()));
     p.set_quaternion(double(q.x()),
                      double(q.y()),
                      double(q.z()),
@@ -101,19 +93,19 @@ Pose PoseImpl::dot(const Pose& p1, const Pose& p2) {
 }
 
 std::tuple<double,double,double> Pose::xyz() {
-    return std::make_tuple(x_ / SCALE, y_ / SCALE, z_ / SCALE);
+    return std::make_tuple(x_, y_, z_);
 }
 
 void Pose::set_xyz(double x, double y, double z) {
-    x_ = x * SCALE;
-    y_ = y * SCALE;
-    z_ = z * SCALE;
+    x_ = x;
+    y_ = y;
+    z_ = z;
 }
 
 void Pose::move_xyz(double x, double y, double z) {
-    x_ += x * SCALE;
-    y_ += y * SCALE;
-    z_ += z * SCALE;
+    x_ += x;
+    y_ += y;
+    z_ += z;
 }
 
 std::tuple<double,double,double> Pose::rpy() const {
@@ -164,9 +156,9 @@ public:
 
     std::tuple<double,double,double> speed() {
         assert(tref->bullet_queried_at_least_once);
-        return std::make_tuple(tref->bullet_speed.x() / SCALE,
-                               tref->bullet_speed.y() / SCALE,
-                               tref->bullet_speed.z() / SCALE);
+        return std::make_tuple(tref->bullet_speed.x(),
+                               tref->bullet_speed.y(),
+                               tref->bullet_speed.z());
     }
 
     std::tuple<double,double,double> angular_speed() {
@@ -353,21 +345,21 @@ public:
     }
 
     void speed(double& vx, double& vy, double& vz) const {
-        vx = rref->root_part->bullet_speed[0] / SCALE;
-        vy = rref->root_part->bullet_speed[1] / SCALE;
-        vz = rref->root_part->bullet_speed[2] / SCALE;
+        vx = rref->root_part->bullet_speed[0];
+        vy = rref->root_part->bullet_speed[1];
+        vz = rref->root_part->bullet_speed[2];
     }
 
     double speed_x() const {
-        return (rref->root_part->bullet_speed[0] / SCALE);
+        return (rref->root_part->bullet_speed[0]);
     }
 
     double speed_y() const {
-        return (rref->root_part->bullet_speed[1] / SCALE);
+        return (rref->root_part->bullet_speed[1]);
     }
 
     double speed_z() const {
-        return (rref->root_part->bullet_speed[2] / SCALE);
+        return (rref->root_part->bullet_speed[2]);
     }
 
     void set_speed(double vx, double vy, double vz) {
@@ -586,7 +578,7 @@ class WorldImpl {
 public:
     WorldImpl(double gravity, double timestep) {
         wref.reset(new Household::World);
-        wref->bullet_init(gravity * SCALE, timestep);
+        wref->bullet_init(gravity, timestep);
     }
 
     ~WorldImpl() {
@@ -614,16 +606,17 @@ public:
 
         return Thingy(make_shared<ThingyImpl>(
                 wref->load_thingy(fn, PoseImpl::to_bt_transform(p),
-                                  scale * SCALE, mass, color, decoration_only),
+                                  scale, mass, color, decoration_only),
                 wref));
     }
 
     Object load_urdf(const std::string& fn,
                      const Pose& p,
+                     float scale,
                      bool fixed_base,
                      bool self_collision) {
         return Object(make_shared<ObjectImpl>(
-                wref->load_urdf(fn, PoseImpl::to_bt_transform(p),
+                wref->load_urdf(fn, PoseImpl::to_bt_transform(p), scale,
                                 fixed_base, self_collision),
                 wref));
     }
@@ -712,9 +705,10 @@ Thingy World::load_thingy(const std::string& fn,
 
 Object World::load_urdf(const std::string& fn,
                         const Pose& pose,
+                        float scale,
                         bool fixed_base,
                         bool self_collision) {
-    return impl_->load_urdf(fn, pose, fixed_base, self_collision);
+    return impl_->load_urdf(fn, pose, scale, fixed_base, self_collision);
 }
 
 std::vector<Object> World::load_mjcf(const std::string& fn) {

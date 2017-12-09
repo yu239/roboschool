@@ -220,6 +220,7 @@ public:
 
     Object load_urdf(const std::string& fn,
                      const Pose& pose,
+                     float scale,
                      bool fixed_base,
                      bool self_collision);
 

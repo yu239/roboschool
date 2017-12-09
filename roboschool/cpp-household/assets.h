@@ -89,6 +89,7 @@ struct ShapeDetailLevels {
 	bool load_later_on = false;
 	std::string load_later_fn;
 	btTransform load_later_transform;
+	float scale;
 	smart_pointer::shared_ptr<MaterialNamespace> materials;
 	std::vector<smart_pointer::shared_ptr<Shape>> detail_levels[DETAIL_LEVELS];
 };

@@ -72,6 +72,7 @@ void World::clean_everything() {
 
 shared_ptr<Robot> World::load_urdf(const std::string& fn,
                                    const btTransform& tr,
+                                   float scale,
                                    bool fixed_base,
                                    bool self_collision) {
     shared_ptr<Robot> robot(new Robot);
@@ -87,6 +88,7 @@ shared_ptr<Robot> World::load_urdf(const std::string& fn,
                                          tr.getRotation()[2],
                                          tr.getRotation()[3]);
     b3LoadUrdfCommandSetUseFixedBase(command, fixed_base);
+    b3LoadUrdfCommandSetGlobalScaling(command, scale);
     //b3LoadUrdfCommandSetUseMultiBody(command, false);
     if (self_collision) {
         b3LoadUrdfCommandSetFlags(
@@ -102,7 +104,7 @@ shared_ptr<Robot> World::load_urdf(const std::string& fn,
     }
     robot->bullet_handle = b3GetStatusBodyIndex(statusHandle);
     load_robot_joints(robot, fn);
-    load_robot_shapes(robot);
+    load_robot_shapes(robot, scale);
     robotlist.push_back(robot);
     bullet_handle_to_robot[robot->bullet_handle] = robot;
     robot->root_part->bullet_handle = robot->bullet_handle;
@@ -146,7 +148,7 @@ std::list<shared_ptr<Robot>> World::load_sdf_mjcf(const std::string& fn,
         shared_ptr<Robot> robot(new Robot);
         robot->bullet_handle = bodyIndicesOut[c];
         load_robot_joints(robot, fn);
-        load_robot_shapes(robot);
+        load_robot_shapes(robot, 1.0);
         robotlist.push_back(robot);
         bullet_handle_to_robot[robot->bullet_handle] = robot;
         ret.push_back(robot);
@@ -158,6 +160,7 @@ static void load_shape_into_class(const shared_ptr<ThingyClass>& klass,
                                   int geom,
                                   const std::string& fn,
                                   float ex, float ey, float ez,
+                                  float scale,
                                   uint32_t color,
                                   const btTransform& viz_frame) {
     shared_ptr<ShapeDetailLevels> save_here = klass->shapedet_visual;
@@ -166,7 +169,7 @@ static void load_shape_into_class(const shared_ptr<ThingyClass>& klass,
     if (center_of_mass_sphere && save_here->detail_levels[DETAIL_BEST].empty()) {
         shared_ptr<Shape> com(new Shape);
         com->primitive_type = Shape::SPHERE;
-        com->sphere.reset(new Sphere({ 0.1f*SCALE }));
+        com->sphere.reset(new Sphere({ 0.1f*scale }));
         com->material.reset(new Material("center_of_mass_sphere"));
         com->material->diffuse_color = 0x40FF0000;
         save_here->detail_levels[DETAIL_BEST].push_back(com);
@@ -180,16 +183,17 @@ static void load_shape_into_class(const shared_ptr<ThingyClass>& klass,
         save_here->load_later_on = true;
         save_here->load_later_fn = fn;
         save_here->load_later_transform = viz_frame;
+        save_here->scale = scale;
         primitive.reset();
     } else if (geom==2) { // URDF_GEOM_SPHERE
         primitive->primitive_type = Shape::SPHERE;
-        primitive->sphere.reset(new Sphere({ ex*SCALE }));
+        primitive->sphere.reset(new Sphere({ ex*scale }));
     } else if (geom==3) { // URDF_GEOM_BOX
         primitive->primitive_type = Shape::BOX;
-        primitive->box.reset(new Box({ ex*SCALE, ey*SCALE, ez*SCALE }));
+        primitive->box.reset(new Box({ ex*scale, ey*scale, ez*scale }));
     } else if (geom==4 || geom==7) { // URDF_GEOM_CYLINDER URDF_GEOM_CAPSULE
         primitive->primitive_type = geom==7 ? Shape::CAPSULE : Shape::CYLINDER;
-        primitive->cylinder.reset(new Cylinder({ ey*SCALE, ex*SCALE })); // rad, length
+        primitive->cylinder.reset(new Cylinder({ ey*scale, ex*scale })); // rad, length
     } else {
         // URDF_GEOM_PLANE ignore
         primitive.reset();
@@ -223,7 +227,11 @@ shared_ptr<Thingy> World::load_thingy(const std::string& the_filename,
     //decoration_only;
     btTransform ident;
     ident.setIdentity();
-    load_shape_into_class(klass, 5, the_filename, scale, scale, scale, color, ident);
+    load_shape_into_class(klass, 5, the_filename,
+                          scale, scale, scale,
+                          scale,
+                          color,
+                          ident);
     if (cx) cx->need_load_missing_textures = true;
     t->klass->frozen = true; // only one shape in thingy, will load quickly next time
     return t;
@@ -294,7 +302,7 @@ shared_ptr<ThingyClass> World::klass_cache_find_or_create(
     return k;
 }
 
-void World::load_robot_shapes(const shared_ptr<Robot>& robot) {
+void World::load_robot_shapes(const shared_ptr<Robot>& robot, float scale) {
     b3SharedMemoryCommandHandle commandHandle =
             b3InitRequestVisualShapeInformation(client, robot->bullet_handle);
     b3SharedMemoryStatusHandle statusHandle =
@@ -359,6 +367,7 @@ void World::load_robot_shapes(const shared_ptr<Robot>& robot) {
                     visualShapeInfo.m_visualShapeData[i].m_dimensions[0],
                     visualShapeInfo.m_visualShapeData[i].m_dimensions[1],
                     visualShapeInfo.m_visualShapeData[i].m_dimensions[2],
+                    scale,
                     color,
                     btTransform(quat, pos));
         }

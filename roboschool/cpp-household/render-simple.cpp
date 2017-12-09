@@ -178,7 +178,7 @@ void Context::load_missing_textures()
 			shared_ptr<ShapeDetailLevels> v = klass->shapedet_visual;
 			if (v->load_later_on) {
 				v->load_later_on = false;
-				load_model(v, v->load_later_fn, 1, v->load_later_transform);
+				load_model(v, v->load_later_fn, v->scale, v->load_later_transform);
 			}
 		}
 		if (!did_anything) break;
